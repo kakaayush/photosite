@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            background-image: url('landing.jpg');
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+        .date-time {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            padding: 20px;
+        }
+        .welcome-message {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            font-family: 'Georgia', serif;
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: #000;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .tab {
+            padding: 15px;
+            color: #ff0;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+        .tab.active {
+            background-color: #333;
+        }
+        .content {
+            padding: 20px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-content h2 {
+            text-align: left;
+        }
+        .form-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .form-container input, .form-container button {
+            width: calc(100% - 20px);
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .form-container button {
+            background-color: #000;
+            color: #ff0;
+            cursor: pointer;
+            border: none;
+        }
+        .transaction-list, .expense-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .transaction-item, .expense-item {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .banking-options {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .banking-option {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        .banking-option:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="date-time" id="dateTime"></div>
+
+    <div class="container">
+        <div class="welcome-message">Welcome Back</div>
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('transaction')">Payments</div>
+            <div class="tab" onclick="showTab('banking')">Banking</div>
+            <div class="tab" onclick="showTab('expense')">Expense</div>
+            <div class="tab" onclick="showTab('profit')">Profit</div>
+        </div>
+
+        <div class="content">
+            <div id="transaction" class="tab-content active">
+              
+                <p></p>
+                <div class="form-container">
+                    <h3>Add Payment</h3>
+                    <input type="number" id="amount" placeholder="Enter Amount" required>
+                    <input type="text" id="itemType" placeholder="Enter Item Type" required>
+                    <button onclick="addPayment()">Add Payment</button>
+                </div>
+                <h3>Total Amount Received: $<span id="totalReceived">0.00</span></h3>
+                <div class="transaction-list" id="transactionList">
+                    <h2>Transaction History</h2>
+                    <!-- Payments will be added here dynamically -->
+                </div>
+            </div>
+            <div id="banking" class="tab-content">
+                <h2>Banking</h2>
+                <p>Select an option below:</p>
+                <div class="banking-options">
+                    <div class="banking-option" onclick="showBankingOption('balance')">Check Balance</div>
+                    <div class="banking-option" onclick="showBankingOption('withdraw')">Withdraw</div>
+                    <div class="banking-option" onclick="showBankingOption('deposit')">Deposit</div>
+                </div>
+                <div id="bankingDetails" class="banking-details" style="display: none;"></div>
+            </div>
+            <div id="expense" class="tab-content">
+                <h2>Expense</h2>
+                <div class="form-container">
+                    <h3>Add Expense</h3>
+                    <input type="number" id="expenseAmount" placeholder="Enter Expense Amount" required>
+                    <button onclick="addExpense()">Add Expense</button>
+                </div>
+                <h3>Total Expenditure: $<span id="totalExpenditure">0.00</span></h3>
+                <div class="expense-list" id="expenseList">
+                    <!-- Expenses will be added here dynamically -->
+                </div>
+            </div>
+            <div id="profit" class="tab-content">
+                <h2>Profit</h2>
+                <p>View your profit details here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let balance = 1000.00; // Initialize balance
+        let totalExpenditure = 0; // Initialize total expenditure
+        let totalReceived = 0; // Initialize total received
+
+        function showTab(tabId) {
+            var tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(function(content) {
+                content.classList.remove('active');
+            });
+
+            var tabs = document.querySelectorAll('.tab');
+            tabs.forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+
+            // Hide banking details when switching tabs
+            if (tabId !== 'banking') {
+                document.getElementById('bankingDetails').style.display = 'none';
+            }
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const time = now.toLocaleTimeString();
+            const date = now.toLocaleDateString(undefined, options);
+            document.getElementById('dateTime').textContent = `${date} ${time}`;
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        function addPayment() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const itemType = document.getElementById('itemType').value;
+            const dateTime = new Date().toLocaleString();
+
+            if (amount && itemType) {
+                totalReceived += amount; // Update total received
+                const transactionList = document.getElementById('transactionList');
+                const transactionItem = document.createElement('div');
+                transactionItem.className = 'transaction-item';
+                transactionItem.innerHTML = `<strong>Amount:</strong> $${amount.toFixed(2)} <br>
+                                             <strong>Item Type:</strong> ${itemType} <br>
+                                             <strong>Date and Time:</strong> ${dateTime}`;
+                
+                transactionList.appendChild(transactionItem);
+
+                // Update total received display
+                document.getElementById('totalReceived').textContent = totalReceived.toFixed(2);
+
+                // Clear the form fields
+                document.getElementById('amount').value = '';
+                document.getElementById('itemType').value = '';
+            } else {
+                alert('Please fill out all fields.');
+            }
+        }
+
+        function addExpense() {
+            const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
+            if (expenseAmount > 0) {
+                totalExpenditure += expenseAmount; // Add to total expenditure
+                const expenseList = document.getElementById('expenseList');
+                const expenseItem = document.createElement('div');
+                expenseItem.className = 'expense-item';
+                expenseItem.innerHTML = `Expense Amount: $${expenseAmount.toFixed(2)}`;
+                
+                expenseList.appendChild(expenseItem);
+
+                // Update total expenditure display
+                document.getElementById('totalExpenditure').textContent = totalExpenditure.toFixed(2);
+                
+                // Clear the form field
+                document.getElementById('expenseAmount').value = '';
+            } else {
+                alert('Please enter a valid expense amount.');
+            }
+        }
+
+        function showBankingOption(option) {
+            const bankingDetails = document.getElementById('bankingDetails');
+            bankingDetails.style.display = 'block';
+            bankingDetails.innerHTML = '';
+
+            if (option === 'balance') {
+                bankingDetails.innerHTML = `<h3>Current Balance: $${balance.toFixed(2)}</h3>`;
+            } else if (option === 'withdraw') {
+                bankingDetails.innerHTML = `
+                    <h3>Withdraw Money</h3>
+                    <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
+                    <button onclick="processWithdrawal()">Withdraw</button>`;
+            } else if (option === 'deposit') {
+                bankingDetails.innerHTML = `
+                    <h3>Deposit Money</h3>
+                    <input type="number" id="depositAmount" placeholder="Enter amount to deposit">
+                    <button onclick="processDeposit()">Deposit</button>`;
+            }
+        }
+
+        function processWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            if (amount > 0 && amount <= balance) {
+                balance -= amount; // Subtract from balance
+                alert(`You have withdrawn $${amount}. Your new balance is $${balance.toFixed(2)}.`);
+                document.getElementById('withdrawAmount').value = ''; // Clear input
+                showBankingOption('balance'); // Update balance display
+            } else {
+                alert('Please enter a valid amount to withdraw or insufficient funds.');
+            }
+        }
+
+        function processDeposit() {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            if (amount > 0) {
+                balance += amount; // Add to balance
+                alert(`You have deposited $${amount}. Your new balance is $${balance.toFixed(2)}.`);
+                document.getElementById('depositAmount').value = ''; // Clear input
+                showBankingOption('balance'); // Update balance display
+            } else {
+                alert('Please enter a valid amount to deposit.');
+            }
+        }
+    </script>
+
+</body>
+</html>
